@@ -27,7 +27,7 @@ vector_model = SearchIndexModel(
             {"type": "filter", "path": "price"},
         ]
     },
-    name="vector_index",
+    name="genaiworkshop_index",
     type="vectorSearch",
 )
 

@@ -25,7 +25,7 @@ def hybrid_search(query: str, limit: int = 10, k: int = 60):
     vector_results = list(coll.aggregate([
         {
             "$vectorSearch": {
-                "index": "vector_index",
+                "index": "genaiworkshop_index",
                 "path": "description_embedding",
                 "queryVector": query_vector,
                 "numCandidates": 150,

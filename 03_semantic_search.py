@@ -22,7 +22,7 @@ def vector_search(query: str, limit: int = 5):
     pipeline = [
         {
             "$vectorSearch": {
-                "index": "vector_index",
+                "index": "genaiworkshop_index",
                 "path": "description_embedding",
                 "queryVector": query_vector,
                 "numCandidates": 100,
@@ -44,10 +44,11 @@ def vector_search(query: str, limit: int = 5):
 
 
 queries = [
-    "comfortable waterproof shoes for hiking",
-    "lightweight running shoes for marathon training",
-    "gift ideas for someone who loves cooking",
-    "noise cancelling headphones for office work",
+    "fashion shoes",
+    "something stylish for a night out",
+    "gift for my dad who loves the outdoors",
+    "rainy day essentials",
+    "cozy work from home setup",
 ]
 
 for query in queries:

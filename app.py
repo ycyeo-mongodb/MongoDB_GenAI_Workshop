@@ -62,7 +62,7 @@ def vector_search(query: str, category: Optional[str], limit: int):
     query_vector = get_query_embedding(query)
     vs_stage = {
         "$vectorSearch": {
-            "index": "vector_index",
+            "index": "genaiworkshop_index",
             "path": "description_embedding",
             "queryVector": query_vector,
             "numCandidates": max(100, limit * 10),
