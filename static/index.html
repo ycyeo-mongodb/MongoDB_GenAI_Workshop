@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Product Search</title>
+  <style>
+    :root {
+      --mongo: #00684A;
+      --mongo-dark: #004d36;
+      --mongo-soft: rgba(0, 104, 74, 0.08);
+      --surface: #ffffff;
+      --border: #e8ebe9;
+      --text: #1a1f1c;
+      --muted: #5c6660;
+      --radius: 12px;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.06);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: var(--text);
+      background: #f6f8f7;
+      min-height: 100vh;
+    }
+    .shell {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 1.25rem 1rem 3rem;
+    }
+    .hero {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem 1.25rem 1.25rem;
+      box-shadow: var(--shadow);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .brand-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--mongo);
+    }
+    .brand h1 {
+      margin: 0;
+      font-size: 1.125rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    @media (min-width: 640px) {
+      .controls { flex-direction: row; flex-wrap: wrap; align-items: center; }
+    }
+    .search-wrap {
+      flex: 1;
+      min-width: 200px;
+    }
+    .search-wrap input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .search-wrap input:focus {
+      border-color: var(--mongo);
+      box-shadow: 0 0 0 3px var(--mongo-soft);
+    }
+    .mode-group {
+      display: inline-flex;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      background: #fafbfb;
+    }
+    .mode-group button {
+      border: none;
+      background: transparent;
+      padding: 0.55rem 0.9rem;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .mode-group button + button { border-left: 1px solid var(--border); }
+    .mode-group button:hover { color: var(--text); background: #fff; }
+    .mode-group button.active {
+      background: var(--mongo);
+      color: #fff;
+    }
+    .mode-group button.active:hover { color: #fff; }
+    .filter-wrap select {
+      padding: 0.55rem 2rem 0.55rem 0.75rem;
+      font-size: 0.875rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      min-width: 11rem;
+    }
+    .meta {
+      margin-top: 0.75rem;
+      font-size: 0.8125rem;
+      color: var(--muted);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      margin-top: 1.25rem;
+    }
+    @media (min-width: 640px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1024px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1rem 1.1rem;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.03);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(0, 104, 74, 0.08), 0 4px 12px rgba(0,0,0,0.06);
+      border-color: rgba(0, 104, 74, 0.25);
+    }
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .card h2 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+      line-height: 1.35;
+      letter-spacing: -0.02em;
+    }
+    .badge {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--mongo-dark);
+      background: var(--mongo-soft);
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .price {
+      font-size: 1.125rem;
+      font-weight: 800;
+      color: var(--mongo);
+      margin: 0.35rem 0 0.5rem;
+    }
+    .desc {
+      margin: 0;
+      font-size: 0.8125rem;
+      line-height: 1.55;
+      color: var(--muted);
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .card-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.8125rem;
+    }
+    .stars { color: #c9a227; letter-spacing: 1px; }
+    .brand-name { color: var(--muted); font-weight: 600; }
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(255,255,255,0.65);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .loading-overlay.visible { opacity: 1; pointer-events: auto; }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--mongo);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty {
+      text-align: center;
+      padding: 2.5rem 1rem;
+      color: var(--muted);
+      font-size: 0.9375rem;
+    }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+  </style>
+</head>
+<body>
+  <div class="loading-overlay" id="loading" aria-hidden="true"><div class="spinner" aria-label="Loading"></div></div>
+  <div class="shell">
+    <div class="hero">
+      <div class="brand">
+        <span class="brand-dot" aria-hidden="true"></span>
+        <h1>Shop search</h1>
+      </div>
+      <div class="controls">
+        <div class="search-wrap">
+          <label class="sr-only" for="q">Search</label>
+          <input type="search" id="q" placeholder="Search products…" autocomplete="off" />
+        </div>
+        <div class="mode-group" role="group" aria-label="Search mode">
+          <button type="button" data-mode="vector">Vector</button>
+          <button type="button" data-mode="text">Text</button>
+          <button type="button" data-mode="hybrid" class="active">Hybrid</button>
+          <button type="button" data-mode="rerank">Hybrid + Rerank</button>
+        </div>
+        <div class="filter-wrap">
+          <label class="sr-only" for="category">Category</label>
+          <select id="category">
+            <option value="">All categories</option>
+            <option>Shoes</option>
+            <option>Clothing</option>
+            <option>Electronics</option>
+            <option>Home &amp; Kitchen</option>
+            <option>Sports &amp; Outdoors</option>
+            <option>Beauty &amp; Personal Care</option>
+            <option>Books &amp; Stationery</option>
+            <option>Bags &amp; Accessories</option>
+          </select>
+        </div>
+      </div>
+      <p class="meta" id="meta">Type to search. Results update after you pause typing.</p>
+    </div>
+    <div class="grid" id="results"></div>
+  </div>
+  <script>
+    (function () {
+      var qEl = document.getElementById("q");
+      var catEl = document.getElementById("category");
+      var resultsEl = document.getElementById("results");
+      var metaEl = document.getElementById("meta");
+      var loadingEl = document.getElementById("loading");
+      var modeButtons = document.querySelectorAll(".mode-group button");
+      var mode = "hybrid";
+      var debounceTimer = null;
+
+      function setLoading(on) {
+        loadingEl.classList.toggle("visible", on);
+        loadingEl.setAttribute("aria-hidden", on ? "false" : "true");
+      }
+
+      modeButtons.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          mode = btn.getAttribute("data-mode") || "hybrid";
+          modeButtons.forEach(function (b) { b.classList.toggle("active", b === btn); });
+          scheduleSearch();
+        });
+      });
+
+      function starsHtml(rating) {
+        var n = Math.max(0, Math.min(5, Math.round(Number(rating) || 0)));
+        var s = "";
+        for (var i = 0; i < 5; i++) {
+          s += i < n ? "\u2605" : "\u2606";
+        }
+        return '<span class="stars">' + s + "</span>";
+      }
+
+      function escapeHtml(t) {
+        if (!t) return "";
+        return String(t)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function renderResults(data) {
+        var list = (data && data.results) || [];
+        metaEl.textContent =
+          (data && data.query ? "\u201c" + data.query + "\u201d" : "Search") +
+          " \u00b7 " +
+          (data && data.mode ? data.mode : mode) +
+          " \u00b7 " +
+          list.length +
+          " result" +
+          (list.length === 1 ? "" : "s");
+
+        if (!list.length) {
+          resultsEl.innerHTML = '<div class="empty">No products found. Try another query or mode.</div>';
+          return;
+        }
+
+        resultsEl.innerHTML = list
+          .map(function (p) {
+            var name = escapeHtml(p.name);
+            var cat = escapeHtml(p.category || "");
+            var desc = escapeHtml(p.description || "");
+            var brand = escapeHtml(p.brand || "");
+            var price = typeof p.price === "number" ? p.price.toFixed(2) : escapeHtml(String(p.price || ""));
+            return (
+              '<article class="card">' +
+              '<div class="card-top">' +
+              "<h2>" + name + "</h2>" +
+              (cat ? '<span class="badge">' + cat + "</span>" : "") +
+              "</div>" +
+              '<p class="price">$' + price + "</p>" +
+              '<p class="desc">' + desc + "</p>" +
+              '<div class="card-foot">' +
+              starsHtml(p.rating) +
+              '<span class="brand-name">' + brand + "</span>" +
+              "</div>" +
+              "</article>"
+            );
+          })
+          .join("");
+      }
+
+      function buildUrl(query) {
+        var params = new URLSearchParams();
+        params.set("q", query);
+        params.set("mode", mode);
+        var c = catEl.value;
+        if (c) params.set("category", c);
+        return "/api/search?" + params.toString();
+      }
+
+      function runSearch() {
+        var query = (qEl.value || "").trim();
+        if (!query) {
+          resultsEl.innerHTML = "";
+          metaEl.textContent = "Type to search. Results update after you pause typing.";
+          return;
+        }
+        setLoading(true);
+        fetch(buildUrl(query))
+          .then(function (r) {
+            if (!r.ok) throw new Error("HTTP " + r.status);
+            return r.json();
+          })
+          .then(renderResults)
+          .catch(function () {
+            metaEl.textContent = "Something went wrong. Is the API running?";
+            resultsEl.innerHTML = '<div class="empty">Could not load results.</div>';
+          })
+          .finally(function () {
+            setLoading(false);
+          });
+      }
+
+      function scheduleSearch() {
+        if (debounceTimer) clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(runSearch, 300);
+      }
+
+      qEl.addEventListener("input", scheduleSearch);
+      catEl.addEventListener("change", function () {
+        if ((qEl.value || "").trim()) runSearch();
+      });
+    })();
+  </script>
+</body>
+</html>

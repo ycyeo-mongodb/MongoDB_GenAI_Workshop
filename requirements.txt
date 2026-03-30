@@ -1,0 +1,5 @@
+pymongo>=4.7
+voyageai>=0.3.7
+python-dotenv>=1.0
+fastapi>=0.115
+uvicorn>=0.30
