@@ -516,6 +516,202 @@
     }
     .order-products { font-size: 0.8125rem; color: var(--muted); margin-top: 0.25rem; }
 
+    /* ---------- Challenge mode ---------- */
+    .challenge-toggle {
+      border: 1px solid #7c3aed;
+      background: rgba(124, 58, 237, 0.08);
+      color: #7c3aed;
+      border-radius: 10px;
+      padding: 0.45rem 0.75rem;
+      cursor: pointer;
+      font-size: 0.8125rem;
+      font-weight: 700;
+      transition: background 0.15s, color 0.15s;
+    }
+    .challenge-toggle:hover { background: #7c3aed; color: #fff; }
+    .challenge-toggle.active { background: #7c3aed; color: #fff; }
+    .challenge-panel {
+      background: var(--surface);
+      border: 2px solid rgba(124, 58, 237, 0.3);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      margin-top: 1rem;
+      box-shadow: var(--shadow);
+      display: none;
+    }
+    .challenge-panel.open { display: block; }
+    .challenge-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+    .challenge-panel-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #7c3aed;
+      margin: 0;
+    }
+    .challenge-progress {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--muted);
+      background: #f3f5f4;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+    }
+    .challenge-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+    .challenge-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+      position: relative;
+    }
+    .challenge-card:hover {
+      border-color: #7c3aed;
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    }
+    .challenge-card.active-challenge {
+      border-color: #7c3aed;
+      background: rgba(124, 58, 237, 0.04);
+    }
+    .challenge-card.completed {
+      border-color: #22c55e;
+      background: rgba(34, 197, 94, 0.04);
+    }
+    .challenge-card-top {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.35rem;
+    }
+    .challenge-num {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: rgba(124, 58, 237, 0.12);
+      color: #7c3aed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6875rem;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .challenge-card.completed .challenge-num {
+      background: #dcfce7;
+      color: #166534;
+    }
+    .challenge-type {
+      font-size: 0.625rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      background: rgba(124, 58, 237, 0.1);
+      color: #7c3aed;
+    }
+    .challenge-query {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0;
+    }
+    .challenge-hint {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+    .challenge-reveal {
+      margin-top: 0.6rem;
+      padding: 0.65rem 0.85rem;
+      border-radius: 8px;
+      background: rgba(124, 58, 237, 0.06);
+      border: 1px solid rgba(124, 58, 237, 0.15);
+      display: none;
+    }
+    .challenge-reveal.visible { display: block; }
+    .challenge-reveal-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #7c3aed;
+      margin-bottom: 0.2rem;
+    }
+    .challenge-reveal-text {
+      font-size: 0.75rem;
+      color: var(--text);
+      line-height: 1.5;
+      margin: 0;
+    }
+    .challenge-reveal-best {
+      display: inline-block;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      background: #7c3aed;
+      color: #fff;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      margin-right: 0.35rem;
+    }
+    .challenge-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .challenge-try-btn {
+      border: 1px solid #7c3aed;
+      background: #7c3aed;
+      color: #fff;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .challenge-try-btn:hover { opacity: 0.85; }
+    .challenge-answer-btn {
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      background: transparent;
+      color: #7c3aed;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .challenge-answer-btn:hover { background: rgba(124, 58, 237, 0.08); }
+    .challenge-score-bar {
+      margin-top: 0.85rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .challenge-score-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .challenge-score-dots {
+      display: flex;
+      gap: 0.35rem;
+    }
+    .challenge-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--border);
+    }
+    .challenge-dot.done { background: #22c55e; }
+
     /* ---------- Loading ---------- */
     .loading-overlay {
       position: fixed; inset: 0;
@@ -558,6 +754,7 @@
         <span class="user-avatar" id="userInitial">W</span>
         <span id="userName">Workshop Shopper</span>
       </div>
+      <button class="challenge-toggle" id="challengeToggle" title="Search Challenge">&#x1F3AF; Challenge</button>
       <button class="orders-btn" id="ordersBtn" title="Order history">Orders</button>
       <button class="cart-btn" id="cartBtn" title="View cart">
         &#x1F6D2;
@@ -614,6 +811,24 @@
       </div>
       <p class="meta" id="meta">Type to search. Results update after you pause typing.</p>
     </div>
+
+    <!-- Challenge panel -->
+    <div class="challenge-panel" id="challengePanel">
+      <div class="challenge-panel-header">
+        <h2 class="challenge-panel-title">&#x1F3AF; Search Challenge</h2>
+        <span class="challenge-progress" id="challengeProgress">0 / 5 completed</span>
+      </div>
+      <p style="font-size:0.8125rem;color:var(--muted);margin:0 0 0.75rem;">
+        Each challenge is designed to show where a specific search mode shines.
+        Click a challenge, try all four modes, then reveal the answer to see why.
+      </p>
+      <div class="challenge-list" id="challengeList"></div>
+      <div class="challenge-score-bar">
+        <span class="challenge-score-label">Progress</span>
+        <div class="challenge-score-dots" id="challengeDots"></div>
+      </div>
+    </div>
+
     <div class="grid" id="results"></div>
   </div>
 
@@ -969,6 +1184,127 @@
 
     qEl.addEventListener("input", scheduleSearch);
     catEl.addEventListener("change", function () { if ((qEl.value || "").trim()) runSearch(); });
+
+    /* ===================== Challenge Mode ===================== */
+    var challenges = [
+      {
+        query: "Nike running shoes",
+        type: "Exact Keywords",
+        hint: "When the user knows exactly what they want by brand and type…",
+        best: "text",
+        bestLabel: "Text Search",
+        explanation: "Text search excels at exact keyword matching. The product names and descriptions contain these exact words, so full-text search finds them directly. Vector search may return other athletic shoes that are semantically similar but aren't Nike."
+      },
+      {
+        query: "something to keep me warm on cold days",
+        type: "Semantic / Vague",
+        hint: "No product is literally named this — the user is describing a need, not a product…",
+        best: "vector",
+        bestLabel: "Vector Search",
+        explanation: "There's no product called 'something to keep me warm'. Vector search understands the semantic meaning and finds jackets, sweaters, blankets — things that match the intent. Text search fails because it looks for those exact words in product descriptions."
+      },
+      {
+        query: "lightweight waterproof jacket for hiking",
+        type: "Multi-Attribute",
+        hint: "Four specific requirements that ALL need to be satisfied simultaneously…",
+        best: "rerank",
+        bestLabel: "Hybrid + Rerank",
+        explanation: "The reranker's cross-encoder reads the query and each product together, checking that ALL four attributes (lightweight, waterproof, jacket, hiking) are present. Hybrid search finds relevant items but may rank a heavy waterproof jacket above a lightweight one because it can't reason about all attributes jointly."
+      },
+      {
+        query: "birthday gift for a cooking enthusiast",
+        type: "Intent-Based",
+        hint: "The user's intent is abstract — 'gift' + 'cooking enthusiast' requires understanding both…",
+        best: "rerank",
+        bestLabel: "Hybrid + Rerank",
+        explanation: "This query combines an abstract intent (gift-worthy) with a domain (cooking). The reranker understands that a premium knife set or artisan cookbook is a better cooking gift than a basic spatula, even though all are cooking-related. It reasons about gift-worthiness + cooking relevance together."
+      },
+      {
+        query: "comfortable shoes under 50 dollars",
+        type: "Keyword + Semantic Mix",
+        hint: "Some words are keywords ('shoes', '$50'), others are semantic ('comfortable')…",
+        best: "hybrid",
+        bestLabel: "Hybrid Search",
+        explanation: "This query mixes exact terms ('shoes') with semantic concepts ('comfortable'). Hybrid search combines text search (finds shoes, catches price mentions) with vector search (understands 'comfortable' means cushioning, arch support). Neither alone covers both aspects as well as the fusion."
+      }
+    ];
+
+    var challengeToggleBtn = document.getElementById("challengeToggle");
+    var challengePanel = document.getElementById("challengePanel");
+    var challengeList = document.getElementById("challengeList");
+    var challengeDots = document.getElementById("challengeDots");
+    var challengeProgress = document.getElementById("challengeProgress");
+    var CHALLENGE_KEY = "ws_challenges";
+    var completedChallenges = JSON.parse(localStorage.getItem(CHALLENGE_KEY) || "[]");
+    var activeChallengeIdx = -1;
+
+    function renderChallenges() {
+      var completedCount = completedChallenges.length;
+      challengeProgress.textContent = completedCount + " / " + challenges.length + " completed";
+
+      challengeDots.innerHTML = challenges.map(function (_, i) {
+        var done = completedChallenges.indexOf(i) !== -1;
+        return '<span class="challenge-dot' + (done ? " done" : "") + '"></span>';
+      }).join("");
+
+      challengeList.innerHTML = challenges.map(function (ch, i) {
+        var done = completedChallenges.indexOf(i) !== -1;
+        var isActive = activeChallengeIdx === i;
+        return (
+          '<div class="challenge-card' + (done ? " completed" : "") + (isActive ? " active-challenge" : "") + '" data-ch="' + i + '">' +
+            '<div class="challenge-card-top">' +
+              '<span class="challenge-num">' + (done ? "&#x2713;" : (i + 1)) + '</span>' +
+              '<span class="challenge-type">' + escapeHtml(ch.type) + '</span>' +
+            '</div>' +
+            '<p class="challenge-query">&ldquo;' + escapeHtml(ch.query) + '&rdquo;</p>' +
+            '<p class="challenge-hint">' + escapeHtml(ch.hint) + '</p>' +
+            '<div class="challenge-actions">' +
+              '<button class="challenge-try-btn" data-try="' + i + '">Try this query</button>' +
+              '<button class="challenge-answer-btn" data-reveal="' + i + '">' + (done ? "Show answer again" : "Reveal answer") + '</button>' +
+            '</div>' +
+            '<div class="challenge-reveal" id="reveal-' + i + '"' + (done ? ' style="display:block"' : '') + '>' +
+              '<div class="challenge-reveal-title">' +
+                '<span class="challenge-reveal-best">' + escapeHtml(ch.bestLabel) + '</span> works best here' +
+              '</div>' +
+              '<p class="challenge-reveal-text">' + escapeHtml(ch.explanation) + '</p>' +
+            '</div>' +
+          '</div>'
+        );
+      }).join("");
+    }
+
+    challengeToggleBtn.addEventListener("click", function () {
+      var isOpen = challengePanel.classList.toggle("open");
+      challengeToggleBtn.classList.toggle("active", isOpen);
+    });
+
+    challengeList.addEventListener("click", function (e) {
+      var tryBtn = e.target.closest("[data-try]");
+      if (tryBtn) {
+        var idx = parseInt(tryBtn.getAttribute("data-try"), 10);
+        var ch = challenges[idx];
+        activeChallengeIdx = idx;
+        qEl.value = ch.query;
+        runSearch();
+        renderChallenges();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+      var revealBtn = e.target.closest("[data-reveal]");
+      if (revealBtn) {
+        var rIdx = parseInt(revealBtn.getAttribute("data-reveal"), 10);
+        var revealEl = document.getElementById("reveal-" + rIdx);
+        if (revealEl) revealEl.style.display = revealEl.style.display === "block" ? "none" : "block";
+        if (completedChallenges.indexOf(rIdx) === -1) {
+          completedChallenges.push(rIdx);
+          localStorage.setItem(CHALLENGE_KEY, JSON.stringify(completedChallenges));
+          renderChallenges();
+        }
+        return;
+      }
+    });
+
+    renderChallenges();
 
     /* ===================== Init ===================== */
     saveCart();
