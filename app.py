@@ -1,15 +1,18 @@
 """
 E-Commerce Product Search API.
 Supports vector search, text search, hybrid search, and hybrid + rerank.
+Includes mock cart & checkout for workshop interactivity.
 """
 
 import os
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 from typing import Optional
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, Query
 from fastapi.responses import HTMLResponse
+from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
 from pymongo import MongoClient
 import voyageai
@@ -18,14 +21,17 @@ load_dotenv()
 
 db_client: MongoClient = None
 coll = None
+orders_coll = None
 vo: voyageai.Client = None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global db_client, coll, vo
+    global db_client, coll, orders_coll, vo
     db_client = MongoClient(os.environ["MONGODB_URI"])
-    coll = db_client["workshop"]["products"]
+    db = db_client["workshop"]
+    coll = db["products"]
+    orders_coll = db["orders"]
     vo = voyageai.Client(api_key=os.environ["VOYAGE_API_KEY"])
     yield
     db_client.close()
@@ -147,6 +153,51 @@ def _serialize(cursor) -> list[dict]:
                 doc[k] = round(v, 4)
         results.append(doc)
     return results
+
+
+class CartItem(BaseModel):
+    name: str
+    price: float
+    category: str = ""
+    brand: str = ""
+    quantity: int = 1
+
+
+class CheckoutRequest(BaseModel):
+    user_name: str
+    items: list[CartItem]
+    search_mode: str = "hybrid"
+
+
+@app.post("/api/checkout")
+def checkout(req: CheckoutRequest):
+    if not req.items:
+        return {"error": "Cart is empty"}
+
+    total = round(sum(item.price * item.quantity for item in req.items), 2)
+    order_doc = {
+        "user_name": req.user_name,
+        "items": [item.model_dump() for item in req.items],
+        "total": total,
+        "item_count": sum(item.quantity for item in req.items),
+        "search_mode_used": req.search_mode,
+        "created_at": datetime.now(timezone.utc),
+    }
+    result = orders_coll.insert_one(order_doc)
+    order_doc["_id"] = str(result.inserted_id)
+    return {"order_id": order_doc["_id"], "total": total, "item_count": order_doc["item_count"]}
+
+
+@app.get("/api/orders")
+def get_orders(user_name: str = Query(...)):
+    cursor = orders_coll.find({"user_name": user_name}).sort("created_at", -1).limit(20)
+    orders = []
+    for doc in cursor:
+        doc["_id"] = str(doc["_id"])
+        if "created_at" in doc and isinstance(doc["created_at"], datetime):
+            doc["created_at"] = doc["created_at"].isoformat()
+        orders.append(doc)
+    return {"orders": orders}
 
 
 @app.get("/", response_class=HTMLResponse)

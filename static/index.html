@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Product Search</title>
+  <title>Shop Search — MongoDB GenAI Workshop</title>
   <style>
     :root {
       --mongo: #00684A;
@@ -13,6 +13,7 @@
       --border: #e8ebe9;
       --text: #1a1f1c;
       --muted: #5c6660;
+      --danger: #d64045;
       --radius: 12px;
       --shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.06);
     }
@@ -24,6 +25,112 @@
       background: #f6f8f7;
       min-height: 100vh;
     }
+
+    /* ---------- Top bar ---------- */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0.65rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .topbar-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--mongo);
+    }
+    .topbar h1 {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--muted);
+      background: #f3f5f4;
+      padding: 0.35rem 0.7rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .user-avatar {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--mongo);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6875rem;
+      font-weight: 700;
+    }
+    .cart-btn {
+      position: relative;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: 10px;
+      padding: 0.45rem 0.65rem;
+      cursor: pointer;
+      font-size: 1.1rem;
+      line-height: 1;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .cart-btn:hover {
+      border-color: var(--mongo);
+      box-shadow: 0 0 0 3px var(--mongo-soft);
+    }
+    .cart-count {
+      position: absolute;
+      top: -6px; right: -6px;
+      background: var(--danger);
+      color: #fff;
+      font-size: 0.625rem;
+      font-weight: 700;
+      min-width: 18px;
+      height: 18px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+    }
+    .cart-count.hidden { display: none; }
+    .orders-btn {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: 10px;
+      padding: 0.45rem 0.65rem;
+      cursor: pointer;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--muted);
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .orders-btn:hover {
+      border-color: var(--mongo);
+      box-shadow: 0 0 0 3px var(--mongo-soft);
+      color: var(--mongo);
+    }
+
+    /* ---------- Shell ---------- */
     .shell {
       max-width: 1120px;
       margin: 0 auto;
@@ -33,26 +140,8 @@
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 1.5rem 1.25rem 1.25rem;
+      padding: 1.25rem;
       box-shadow: var(--shadow);
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 1rem;
-    }
-    .brand-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--mongo);
-    }
-    .brand h1 {
-      margin: 0;
-      font-size: 1.125rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
     }
     .controls {
       display: flex;
@@ -62,10 +151,7 @@
     @media (min-width: 640px) {
       .controls { flex-direction: row; flex-wrap: wrap; align-items: center; }
     }
-    .search-wrap {
-      flex: 1;
-      min-width: 200px;
-    }
+    .search-wrap { flex: 1; min-width: 200px; }
     .search-wrap input {
       width: 100%;
       padding: 0.75rem 1rem;
@@ -98,10 +184,7 @@
     }
     .mode-group button + button { border-left: 1px solid var(--border); }
     .mode-group button:hover { color: var(--text); background: #fff; }
-    .mode-group button.active {
-      background: var(--mongo);
-      color: #fff;
-    }
+    .mode-group button.active { background: var(--mongo); color: #fff; }
     .mode-group button.active:hover { color: #fff; }
     .filter-wrap select {
       padding: 0.55rem 2rem 0.55rem 0.75rem;
@@ -118,6 +201,8 @@
       font-size: 0.8125rem;
       color: var(--muted);
     }
+
+    /* ---------- Product grid ---------- */
     .grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -130,9 +215,11 @@
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 1rem 1rem 1.1rem;
+      padding: 1rem 1rem 0.75rem;
       box-shadow: 0 1px 0 rgba(0,0,0,0.03);
       transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s;
+      display: flex;
+      flex-direction: column;
     }
     .card:hover {
       transform: translateY(-2px);
@@ -179,6 +266,7 @@
       -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
+      flex: 1;
     }
     .card-foot {
       display: flex;
@@ -191,9 +279,246 @@
     }
     .stars { color: #c9a227; letter-spacing: 1px; }
     .brand-name { color: var(--muted); font-weight: 600; }
-    .loading-overlay {
+    mark {
+      background: rgba(0, 104, 74, 0.15);
+      color: inherit;
+      padding: 0.05em 0.15em;
+      border-radius: 3px;
+    }
+    .score-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .score-pill .score-label {
+      font-family: inherit;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-size: 0.5625rem;
+      opacity: 0.7;
+    }
+    .score-high { background: #dcfce7; color: #166534; }
+    .score-med  { background: #fef9c3; color: #854d0e; }
+    .score-low  { background: #fee2e2; color: #991b1b; }
+    .card-rank {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--mongo-soft);
+      color: var(--mongo-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6875rem;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .card-header-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .card-header-left { flex: 1; min-width: 0; }
+    .card-header-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.35rem;
+      flex-shrink: 0;
+    }
+    .add-cart-btn {
+      border: 1px solid var(--mongo);
+      background: var(--mongo-soft);
+      color: var(--mongo-dark);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+    .add-cart-btn:hover { background: var(--mongo); color: #fff; }
+    .add-cart-btn.added {
+      background: var(--mongo);
+      color: #fff;
+      pointer-events: none;
+    }
+
+    /* ---------- Overlay / drawer ---------- */
+    .drawer-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.35);
+      z-index: 90;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    .drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+    .drawer {
       position: fixed;
-      inset: 0;
+      top: 0; right: 0;
+      width: min(420px, 92vw);
+      height: 100%;
+      background: var(--surface);
+      z-index: 91;
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: -4px 0 24px rgba(0,0,0,0.12);
+    }
+    .drawer.open { transform: translateX(0); }
+    .drawer-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .drawer-header h2 { margin: 0; font-size: 1.05rem; }
+    .drawer-close {
+      border: none; background: none;
+      font-size: 1.3rem; cursor: pointer;
+      color: var(--muted);
+      padding: 0.25rem;
+    }
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem 1.25rem;
+    }
+    .drawer-footer {
+      padding: 1rem 1.25rem;
+      border-top: 1px solid var(--border);
+    }
+    .cart-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .cart-item:last-child { border-bottom: none; }
+    .cart-item-info { flex: 1; }
+    .cart-item-name { font-weight: 700; font-size: 0.875rem; margin-bottom: 0.15rem; }
+    .cart-item-meta { font-size: 0.75rem; color: var(--muted); }
+    .cart-item-price { font-weight: 800; color: var(--mongo); font-size: 0.875rem; white-space: nowrap; }
+    .cart-item-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-top: 0.35rem;
+    }
+    .qty-btn {
+      width: 24px; height: 24px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+      font-size: 0.875rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+    }
+    .qty-btn:hover { border-color: var(--mongo); }
+    .qty-val { font-size: 0.8125rem; font-weight: 700; min-width: 20px; text-align: center; }
+    .remove-btn {
+      border: none; background: none;
+      color: var(--danger);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-left: 0.5rem;
+    }
+    .cart-total {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1rem;
+      font-weight: 800;
+      margin-bottom: 0.75rem;
+    }
+    .checkout-btn {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--mongo);
+      color: #fff;
+      font-size: 0.9375rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .checkout-btn:hover { background: var(--mongo-dark); }
+    .checkout-btn:disabled {
+      background: var(--border);
+      cursor: default;
+      color: var(--muted);
+    }
+    .empty-cart {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: 0.875rem;
+    }
+
+    /* ---------- Order confirmation / history ---------- */
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%; transform: translateX(-50%) translateY(120px);
+      background: var(--mongo);
+      color: #fff;
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.875rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+      z-index: 100;
+      transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+      white-space: nowrap;
+    }
+    .toast.visible { transform: translateX(-50%) translateY(0); }
+    .order-item {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.85rem 1rem;
+      margin-bottom: 0.75rem;
+      background: #fafbfb;
+    }
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.35rem;
+    }
+    .order-id { font-size: 0.75rem; color: var(--muted); font-family: monospace; }
+    .order-total { font-weight: 800; color: var(--mongo); }
+    .order-mode {
+      display: inline-block;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: var(--mongo-soft);
+      color: var(--mongo-dark);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+    }
+    .order-products { font-size: 0.8125rem; color: var(--muted); margin-top: 0.25rem; }
+
+    /* ---------- Loading ---------- */
+    .loading-overlay {
+      position: fixed; inset: 0;
       background: rgba(255,255,255,0.65);
       display: flex;
       align-items: center;
@@ -205,8 +530,7 @@
     }
     .loading-overlay.visible { opacity: 1; pointer-events: auto; }
     .spinner {
-      width: 40px;
-      height: 40px;
+      width: 40px; height: 40px;
       border: 3px solid var(--border);
       border-top-color: var(--mongo);
       border-radius: 50%;
@@ -223,13 +547,45 @@
   </style>
 </head>
 <body>
+  <!-- Top navigation bar -->
+  <nav class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-dot" aria-hidden="true"></span>
+      <h1>Shop Search</h1>
+    </div>
+    <div class="topbar-right">
+      <div class="user-pill">
+        <span class="user-avatar" id="userInitial">W</span>
+        <span id="userName">Workshop Shopper</span>
+      </div>
+      <button class="orders-btn" id="ordersBtn" title="Order history">Orders</button>
+      <button class="cart-btn" id="cartBtn" title="View cart">
+        &#x1F6D2;
+        <span class="cart-count hidden" id="cartCount">0</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Loading overlay -->
   <div class="loading-overlay" id="loading" aria-hidden="true"><div class="spinner" aria-label="Loading"></div></div>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Cart drawer -->
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+  <aside class="drawer" id="drawer" aria-label="Shopping cart">
+    <div class="drawer-header">
+      <h2 id="drawerTitle">Your Cart</h2>
+      <button class="drawer-close" id="drawerClose">&times;</button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+    <div class="drawer-footer" id="drawerFooter"></div>
+  </aside>
+
+  <!-- Main content -->
   <div class="shell">
     <div class="hero">
-      <div class="brand">
-        <span class="brand-dot" aria-hidden="true"></span>
-        <h1>Shop search</h1>
-      </div>
       <div class="controls">
         <div class="search-wrap">
           <label class="sr-only" for="q">Search</label>
@@ -260,131 +616,363 @@
     </div>
     <div class="grid" id="results"></div>
   </div>
-  <script>
-    (function () {
-      var qEl = document.getElementById("q");
-      var catEl = document.getElementById("category");
-      var resultsEl = document.getElementById("results");
-      var metaEl = document.getElementById("meta");
-      var loadingEl = document.getElementById("loading");
-      var modeButtons = document.querySelectorAll(".mode-group button");
-      var mode = "hybrid";
-      var debounceTimer = null;
 
-      function setLoading(on) {
-        loadingEl.classList.toggle("visible", on);
-        loadingEl.setAttribute("aria-hidden", on ? "false" : "true");
+  <script>
+  (function () {
+    /* ===================== State ===================== */
+    var USER_KEY = "ws_user";
+    var CART_KEY = "ws_cart";
+    var userName = localStorage.getItem(USER_KEY) || "Workshop Shopper";
+    var cart = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
+
+    /* ===================== DOM refs ===================== */
+    var qEl = document.getElementById("q");
+    var catEl = document.getElementById("category");
+    var resultsEl = document.getElementById("results");
+    var metaEl = document.getElementById("meta");
+    var loadingEl = document.getElementById("loading");
+    var modeButtons = document.querySelectorAll(".mode-group button");
+    var cartBtn = document.getElementById("cartBtn");
+    var cartCountEl = document.getElementById("cartCount");
+    var ordersBtn = document.getElementById("ordersBtn");
+    var drawer = document.getElementById("drawer");
+    var drawerBackdrop = document.getElementById("drawerBackdrop");
+    var drawerClose = document.getElementById("drawerClose");
+    var drawerTitle = document.getElementById("drawerTitle");
+    var drawerBody = document.getElementById("drawerBody");
+    var drawerFooter = document.getElementById("drawerFooter");
+    var toastEl = document.getElementById("toast");
+    var userNameEl = document.getElementById("userName");
+    var userInitialEl = document.getElementById("userInitial");
+
+    var mode = "hybrid";
+    var debounceTimer = null;
+    var drawerMode = "cart"; // "cart" or "orders"
+
+    /* ===================== User name ===================== */
+    userNameEl.textContent = userName;
+    userInitialEl.textContent = userName.charAt(0).toUpperCase();
+
+    /* ===================== Helpers ===================== */
+    function escapeHtml(t) {
+      if (!t) return "";
+      return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+    function starsHtml(rating) {
+      var n = Math.max(0, Math.min(5, Math.round(Number(rating) || 0)));
+      var s = "";
+      for (var i = 0; i < 5; i++) s += i < n ? "\u2605" : "\u2606";
+      return '<span class="stars">' + s + "</span>";
+    }
+    function setLoading(on) {
+      loadingEl.classList.toggle("visible", on);
+      loadingEl.setAttribute("aria-hidden", on ? "false" : "true");
+    }
+    function showToast(msg) {
+      toastEl.textContent = msg;
+      toastEl.classList.add("visible");
+      setTimeout(function () { toastEl.classList.remove("visible"); }, 2500);
+    }
+    function saveCart() {
+      localStorage.setItem(CART_KEY, JSON.stringify(cart));
+      var total = cart.reduce(function (s, i) { return s + i.quantity; }, 0);
+      cartCountEl.textContent = total;
+      cartCountEl.classList.toggle("hidden", total === 0);
+    }
+
+    /* ===================== Cart ===================== */
+    function addToCart(product) {
+      var existing = cart.find(function (c) { return c.name === product.name; });
+      if (existing) {
+        existing.quantity += 1;
+      } else {
+        cart.push({
+          name: product.name,
+          price: product.price,
+          category: product.category || "",
+          brand: product.brand || "",
+          quantity: 1
+        });
+      }
+      saveCart();
+      showToast("Added to cart: " + product.name);
+    }
+
+    function renderCartDrawer() {
+      drawerMode = "cart";
+      drawerTitle.textContent = "Your Cart (" + cart.reduce(function (s, i) { return s + i.quantity; }, 0) + ")";
+      if (!cart.length) {
+        drawerBody.innerHTML = '<div class="empty-cart">Your cart is empty.<br>Search for products and add them!</div>';
+        drawerFooter.innerHTML = "";
+        return;
+      }
+      var total = 0;
+      drawerBody.innerHTML = cart.map(function (item, idx) {
+        var sub = item.price * item.quantity;
+        total += sub;
+        return (
+          '<div class="cart-item">' +
+            '<div class="cart-item-info">' +
+              '<div class="cart-item-name">' + escapeHtml(item.name) + '</div>' +
+              '<div class="cart-item-meta">' + escapeHtml(item.brand) + (item.category ? " · " + escapeHtml(item.category) : "") + '</div>' +
+              '<div class="cart-item-actions">' +
+                '<button class="qty-btn" data-action="dec" data-idx="' + idx + '">−</button>' +
+                '<span class="qty-val">' + item.quantity + '</span>' +
+                '<button class="qty-btn" data-action="inc" data-idx="' + idx + '">+</button>' +
+                '<button class="remove-btn" data-action="remove" data-idx="' + idx + '">Remove</button>' +
+              '</div>' +
+            '</div>' +
+            '<div class="cart-item-price">$' + sub.toFixed(2) + '</div>' +
+          '</div>'
+        );
+      }).join("");
+
+      drawerFooter.innerHTML =
+        '<div class="cart-total"><span>Total</span><span>$' + total.toFixed(2) + '</span></div>' +
+        '<button class="checkout-btn" id="checkoutBtn">Checkout</button>';
+
+      document.getElementById("checkoutBtn").addEventListener("click", doCheckout);
+    }
+
+    drawerBody.addEventListener("click", function (e) {
+      if (drawerMode !== "cart") return;
+      var btn = e.target.closest("[data-action]");
+      if (!btn) return;
+      var idx = parseInt(btn.getAttribute("data-idx"), 10);
+      var action = btn.getAttribute("data-action");
+      if (action === "inc") { cart[idx].quantity += 1; }
+      else if (action === "dec") { cart[idx].quantity = Math.max(1, cart[idx].quantity - 1); }
+      else if (action === "remove") { cart.splice(idx, 1); }
+      saveCart();
+      renderCartDrawer();
+    });
+
+    /* ===================== Checkout ===================== */
+    function doCheckout() {
+      if (!cart.length) return;
+      var btn = document.getElementById("checkoutBtn");
+      btn.disabled = true;
+      btn.textContent = "Processing…";
+
+      fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_name: userName, items: cart, search_mode: mode })
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (data.error) { showToast("Error: " + data.error); return; }
+          cart = [];
+          saveCart();
+          closeDrawer();
+          showToast("Order placed! " + data.item_count + " item(s) · $" + data.total.toFixed(2));
+        })
+        .catch(function () { showToast("Checkout failed. Is the API running?"); })
+        .finally(function () {
+          if (btn) { btn.disabled = false; btn.textContent = "Checkout"; }
+        });
+    }
+
+    /* ===================== Orders ===================== */
+    function renderOrdersDrawer() {
+      drawerMode = "orders";
+      drawerTitle.textContent = "Order History";
+      drawerBody.innerHTML = '<div class="empty-cart">Loading orders…</div>';
+      drawerFooter.innerHTML = "";
+
+      fetch("/api/orders?user_name=" + encodeURIComponent(userName))
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          var orders = data.orders || [];
+          if (!orders.length) {
+            drawerBody.innerHTML = '<div class="empty-cart">No orders yet.<br>Search, add items to cart, and checkout!</div>';
+            return;
+          }
+          drawerBody.innerHTML = orders.map(function (o) {
+            var products = (o.items || []).map(function (i) { return i.name + " ×" + i.quantity; }).join(", ");
+            var date = o.created_at ? new Date(o.created_at).toLocaleString() : "";
+            return (
+              '<div class="order-item">' +
+                '<div class="order-header">' +
+                  '<span class="order-id">' + (o._id || "").slice(-8) + '</span>' +
+                  '<span class="order-total">$' + (o.total || 0).toFixed(2) + '</span>' +
+                '</div>' +
+                '<div><span class="order-mode">' + escapeHtml(o.search_mode_used || "hybrid") + '</span>' +
+                  '<span style="font-size:0.75rem;color:var(--muted);margin-left:0.5rem;">' + date + '</span>' +
+                '</div>' +
+                '<div class="order-products">' + escapeHtml(products) + '</div>' +
+              '</div>'
+            );
+          }).join("");
+        })
+        .catch(function () {
+          drawerBody.innerHTML = '<div class="empty-cart">Could not load orders.</div>';
+        });
+    }
+
+    /* ===================== Drawer open/close ===================== */
+    function openDrawer(modeType) {
+      if (modeType === "orders") renderOrdersDrawer();
+      else renderCartDrawer();
+      drawer.classList.add("open");
+      drawerBackdrop.classList.add("open");
+    }
+    function closeDrawer() {
+      drawer.classList.remove("open");
+      drawerBackdrop.classList.remove("open");
+    }
+    cartBtn.addEventListener("click", function () { openDrawer("cart"); });
+    ordersBtn.addEventListener("click", function () { openDrawer("orders"); });
+    drawerClose.addEventListener("click", closeDrawer);
+    drawerBackdrop.addEventListener("click", closeDrawer);
+
+    /* ===================== Search ===================== */
+    modeButtons.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        mode = btn.getAttribute("data-mode") || "hybrid";
+        modeButtons.forEach(function (b) { b.classList.toggle("active", b === btn); });
+        scheduleSearch();
+      });
+    });
+
+    function highlightTerms(text, query) {
+      if (!query || !text) return text;
+      var words = query.split(/\s+/).filter(function (w) { return w.length > 1; });
+      if (!words.length) return text;
+      var pattern = new RegExp("(" + words.map(function (w) {
+        return w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      }).join("|") + ")", "gi");
+      return text.replace(pattern, "<mark>$1</mark>");
+    }
+
+    function scoreClass(score, searchMode) {
+      if (searchMode === "rerank") {
+        if (score >= 0.7) return "score-high";
+        if (score >= 0.3) return "score-med";
+        return "score-low";
+      }
+      if (searchMode === "vector") {
+        if (score >= 0.75) return "score-high";
+        if (score >= 0.5) return "score-med";
+        return "score-low";
+      }
+      if (score >= 0.025) return "score-high";
+      if (score >= 0.015) return "score-med";
+      return "score-low";
+    }
+
+    function scoreLabel(searchMode) {
+      if (searchMode === "rerank") return "relevance";
+      if (searchMode === "vector") return "similarity";
+      if (searchMode === "text") return "text score";
+      return "RRF";
+    }
+
+    function renderResults(data) {
+      var list = (data && data.results) || [];
+      var currentQuery = (data && data.query) || "";
+      var currentMode = (data && data.mode) || mode;
+      metaEl.textContent =
+        (currentQuery ? "\u201c" + currentQuery + "\u201d" : "Search") +
+        " \u00b7 " + currentMode +
+        " \u00b7 " + list.length + " result" + (list.length === 1 ? "" : "s");
+
+      if (!list.length) {
+        resultsEl.innerHTML = '<div class="empty">No products found. Try another query or mode.</div>';
+        return;
       }
 
-      modeButtons.forEach(function (btn) {
+      resultsEl.innerHTML = list.map(function (p, idx) {
+        var name = highlightTerms(escapeHtml(p.name), currentQuery);
+        var cat = escapeHtml(p.category || "");
+        var desc = highlightTerms(escapeHtml(p.description || ""), currentQuery);
+        var brand = escapeHtml(p.brand || "");
+        var price = typeof p.price === "number" ? p.price.toFixed(2) : escapeHtml(String(p.price || ""));
+        var score = p.score;
+        var sClass = scoreClass(score, currentMode);
+        var sLabel = scoreLabel(currentMode);
+        var scoreDisplay = typeof score === "number" ? score.toFixed(4) : score;
+        return (
+          '<article class="card">' +
+            '<div class="card-header-row">' +
+              '<span class="card-rank">' + (idx + 1) + '</span>' +
+              '<div class="card-header-left">' +
+                "<h2>" + name + "</h2>" +
+                (brand ? '<span class="brand-name">' + brand + "</span>" : "") +
+              '</div>' +
+              '<div class="card-header-right">' +
+                (cat ? '<span class="badge">' + cat + "</span>" : "") +
+                '<span class="score-pill ' + sClass + '">' +
+                  '<span class="score-label">' + sLabel + '</span> ' + scoreDisplay +
+                '</span>' +
+              '</div>' +
+            "</div>" +
+            '<p class="price">$' + price + "</p>" +
+            '<p class="desc">' + desc + "</p>" +
+            '<div class="card-foot">' +
+              starsHtml(p.rating) +
+              '<button class="add-cart-btn" data-idx="' + idx + '">Add to cart</button>' +
+            "</div>" +
+          "</article>"
+        );
+      }).join("");
+
+      resultsEl.querySelectorAll(".add-cart-btn").forEach(function (btn) {
         btn.addEventListener("click", function () {
-          mode = btn.getAttribute("data-mode") || "hybrid";
-          modeButtons.forEach(function (b) { b.classList.toggle("active", b === btn); });
-          scheduleSearch();
+          var i = parseInt(btn.getAttribute("data-idx"), 10);
+          var product = list[i];
+          addToCart(product);
+          btn.textContent = "Added!";
+          btn.classList.add("added");
+          setTimeout(function () {
+            btn.textContent = "Add to cart";
+            btn.classList.remove("added");
+          }, 1200);
         });
       });
+    }
 
-      function starsHtml(rating) {
-        var n = Math.max(0, Math.min(5, Math.round(Number(rating) || 0)));
-        var s = "";
-        for (var i = 0; i < 5; i++) {
-          s += i < n ? "\u2605" : "\u2606";
-        }
-        return '<span class="stars">' + s + "</span>";
+    function buildUrl(query) {
+      var params = new URLSearchParams();
+      params.set("q", query);
+      params.set("mode", mode);
+      var c = catEl.value;
+      if (c) params.set("category", c);
+      return "/api/search?" + params.toString();
+    }
+
+    function runSearch() {
+      var query = (qEl.value || "").trim();
+      if (!query) {
+        resultsEl.innerHTML = "";
+        metaEl.textContent = "Type to search. Results update after you pause typing.";
+        return;
       }
+      setLoading(true);
+      fetch(buildUrl(query))
+        .then(function (r) {
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          return r.json();
+        })
+        .then(renderResults)
+        .catch(function () {
+          metaEl.textContent = "Something went wrong. Is the API running?";
+          resultsEl.innerHTML = '<div class="empty">Could not load results.</div>';
+        })
+        .finally(function () { setLoading(false); });
+    }
 
-      function escapeHtml(t) {
-        if (!t) return "";
-        return String(t)
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/"/g, "&quot;");
-      }
+    function scheduleSearch() {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(runSearch, 300);
+    }
 
-      function renderResults(data) {
-        var list = (data && data.results) || [];
-        metaEl.textContent =
-          (data && data.query ? "\u201c" + data.query + "\u201d" : "Search") +
-          " \u00b7 " +
-          (data && data.mode ? data.mode : mode) +
-          " \u00b7 " +
-          list.length +
-          " result" +
-          (list.length === 1 ? "" : "s");
+    qEl.addEventListener("input", scheduleSearch);
+    catEl.addEventListener("change", function () { if ((qEl.value || "").trim()) runSearch(); });
 
-        if (!list.length) {
-          resultsEl.innerHTML = '<div class="empty">No products found. Try another query or mode.</div>';
-          return;
-        }
-
-        resultsEl.innerHTML = list
-          .map(function (p) {
-            var name = escapeHtml(p.name);
-            var cat = escapeHtml(p.category || "");
-            var desc = escapeHtml(p.description || "");
-            var brand = escapeHtml(p.brand || "");
-            var price = typeof p.price === "number" ? p.price.toFixed(2) : escapeHtml(String(p.price || ""));
-            return (
-              '<article class="card">' +
-              '<div class="card-top">' +
-              "<h2>" + name + "</h2>" +
-              (cat ? '<span class="badge">' + cat + "</span>" : "") +
-              "</div>" +
-              '<p class="price">$' + price + "</p>" +
-              '<p class="desc">' + desc + "</p>" +
-              '<div class="card-foot">' +
-              starsHtml(p.rating) +
-              '<span class="brand-name">' + brand + "</span>" +
-              "</div>" +
-              "</article>"
-            );
-          })
-          .join("");
-      }
-
-      function buildUrl(query) {
-        var params = new URLSearchParams();
-        params.set("q", query);
-        params.set("mode", mode);
-        var c = catEl.value;
-        if (c) params.set("category", c);
-        return "/api/search?" + params.toString();
-      }
-
-      function runSearch() {
-        var query = (qEl.value || "").trim();
-        if (!query) {
-          resultsEl.innerHTML = "";
-          metaEl.textContent = "Type to search. Results update after you pause typing.";
-          return;
-        }
-        setLoading(true);
-        fetch(buildUrl(query))
-          .then(function (r) {
-            if (!r.ok) throw new Error("HTTP " + r.status);
-            return r.json();
-          })
-          .then(renderResults)
-          .catch(function () {
-            metaEl.textContent = "Something went wrong. Is the API running?";
-            resultsEl.innerHTML = '<div class="empty">Could not load results.</div>';
-          })
-          .finally(function () {
-            setLoading(false);
-          });
-      }
-
-      function scheduleSearch() {
-        if (debounceTimer) clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(runSearch, 300);
-      }
-
-      qEl.addEventListener("input", scheduleSearch);
-      catEl.addEventListener("change", function () {
-        if ((qEl.value || "").trim()) runSearch();
-      });
-    })();
+    /* ===================== Init ===================== */
+    saveCart();
+  })();
   </script>
 </body>
 </html>
