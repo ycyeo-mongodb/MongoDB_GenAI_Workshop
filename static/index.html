@@ -3,34 +3,54 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Shop Search — MongoDB GenAI Workshop</title>
+  <title>LeafyShop — Product Search · MongoDB GenAI Workshop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
-      --mongo: #00684A;
-      --mongo-dark: #004d36;
+      /* LeafyShop palette (shared with Advanced workshop) */
+      --mongo-green: #00684A;
+      --mongo-green-dark: #023430;
+      --mongo-green-light: #00ED64;
+      --mongo-slate: #001E2B;
+      --mongo-mist: #E3FCF7;
+      --mongo-spring: #71F6BA;
+      --mongo-bg: #f4f8f6;
+      --mongo-card: #ffffff;
+      --mongo-border: #d4e4dc;
+      --mongo-text: #1a2e28;
+      --mongo-muted: #5b7268;
+      --shadow-card: 0 1px 3px rgba(0,104,74,.06), 0 0 0 1px rgba(0,104,74,.04);
+      --shadow-hover: 0 8px 24px rgba(0,104,74,.10), 0 2px 8px rgba(0,0,0,.06);
+
+      /* Legacy aliases kept so existing rules below continue to work */
+      --mongo: var(--mongo-green);
+      --mongo-dark: var(--mongo-green-dark);
       --mongo-soft: rgba(0, 104, 74, 0.08);
-      --surface: #ffffff;
-      --border: #e8ebe9;
-      --text: #1a1f1c;
-      --muted: #5c6660;
+      --surface: var(--mongo-card);
+      --border: var(--mongo-border);
+      --text: var(--mongo-text);
+      --muted: var(--mongo-muted);
       --danger: #d64045;
-      --radius: 12px;
-      --shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.06);
+      --radius: 10px;
+      --shadow: var(--shadow-card);
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       color: var(--text);
-      background: #f6f8f7;
+      background: var(--mongo-bg);
       min-height: 100vh;
     }
 
-    /* ---------- Top bar ---------- */
+    /* ---------- Top bar (LeafyShop brand) ---------- */
     .topbar {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 0.65rem 1rem;
+      background: var(--mongo-slate);
+      color: #fff;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding: 0.6rem 1rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -41,23 +61,41 @@
     .topbar-left {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.55rem;
     }
     .topbar-dot {
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      background: var(--mongo);
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: var(--mongo-green-light);
+      color: var(--mongo-slate);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
     }
     .topbar h1 {
       margin: 0;
-      font-size: 1.05rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
+      font-size: 1.25rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      color: #fff;
+      line-height: 1.1;
+    }
+    .topbar h1 .brand-sub {
+      display: block;
+      margin-top: -1px;
+      font-size: 0.62rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      color: rgba(255,255,255,0.55);
+      text-transform: uppercase;
     }
     .topbar-right {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.55rem;
     }
     .user-pill {
       display: flex;
@@ -65,37 +103,38 @@
       gap: 0.4rem;
       font-size: 0.8125rem;
       font-weight: 600;
-      color: var(--muted);
-      background: #f3f5f4;
+      color: rgba(255,255,255,0.85);
+      background: rgba(255,255,255,0.07);
       padding: 0.35rem 0.7rem;
       border-radius: 8px;
-      border: 1px solid var(--border);
+      border: 1px solid rgba(255,255,255,0.12);
     }
     .user-avatar {
       width: 22px; height: 22px;
       border-radius: 50%;
-      background: var(--mongo);
-      color: #fff;
+      background: var(--mongo-green-light);
+      color: var(--mongo-slate);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 0.6875rem;
-      font-weight: 700;
+      font-weight: 800;
     }
     .cart-btn {
       position: relative;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      border-radius: 10px;
-      padding: 0.45rem 0.65rem;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      border-radius: 8px;
+      padding: 0.4rem 0.65rem;
       cursor: pointer;
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       line-height: 1;
-      transition: border-color 0.15s, box-shadow 0.15s;
+      transition: border-color 0.15s, background 0.15s;
     }
     .cart-btn:hover {
-      border-color: var(--mongo);
-      box-shadow: 0 0 0 3px var(--mongo-soft);
+      border-color: rgba(255,255,255,0.35);
+      background: rgba(255,255,255,0.12);
     }
     .cart-count {
       position: absolute;
@@ -114,20 +153,20 @@
     }
     .cart-count.hidden { display: none; }
     .orders-btn {
-      border: 1px solid var(--border);
-      background: var(--surface);
-      border-radius: 10px;
-      padding: 0.45rem 0.65rem;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.9);
+      border-radius: 8px;
+      padding: 0.45rem 0.75rem;
       cursor: pointer;
       font-size: 0.8125rem;
       font-weight: 600;
-      color: var(--muted);
-      transition: border-color 0.15s, box-shadow 0.15s;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
     }
     .orders-btn:hover {
-      border-color: var(--mongo);
-      box-shadow: 0 0 0 3px var(--mongo-soft);
-      color: var(--mongo);
+      border-color: rgba(255,255,255,0.35);
+      background: rgba(255,255,255,0.12);
+      color: #fff;
     }
 
     /* ---------- Shell ---------- */
@@ -518,18 +557,18 @@
 
     /* ---------- Challenge mode ---------- */
     .challenge-toggle {
-      border: 1px solid #7c3aed;
-      background: rgba(124, 58, 237, 0.08);
-      color: #7c3aed;
-      border-radius: 10px;
+      border: 1px solid rgba(167, 139, 250, 0.5);
+      background: rgba(124, 58, 237, 0.22);
+      color: #e9defa;
+      border-radius: 8px;
       padding: 0.45rem 0.75rem;
       cursor: pointer;
       font-size: 0.8125rem;
       font-weight: 700;
-      transition: background 0.15s, color 0.15s;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
     }
-    .challenge-toggle:hover { background: #7c3aed; color: #fff; }
-    .challenge-toggle.active { background: #7c3aed; color: #fff; }
+    .challenge-toggle:hover { background: #7c3aed; color: #fff; border-color: #a78bfa; }
+    .challenge-toggle.active { background: #7c3aed; color: #fff; border-color: #a78bfa; }
     .challenge-panel {
       background: var(--surface);
       border: 2px solid rgba(124, 58, 237, 0.3);
@@ -746,8 +785,8 @@
   <!-- Top navigation bar -->
   <nav class="topbar">
     <div class="topbar-left">
-      <span class="topbar-dot" aria-hidden="true"></span>
-      <h1>Shop Search</h1>
+      <span class="topbar-dot" aria-hidden="true">LS</span>
+      <h1>LeafyShop<span class="brand-sub">MongoDB GenAI Workshop · Part 1</span></h1>
     </div>
     <div class="topbar-right">
       <div class="user-pill">
