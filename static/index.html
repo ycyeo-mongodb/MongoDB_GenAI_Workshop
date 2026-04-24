@@ -729,7 +729,10 @@
        PART 1 FEATURE LOCK — marks Advanced-only features and the
        modal that explains they live in the Advanced workshop.
        ============================================================ */
-    .advanced-locked { position: relative; opacity: 0.8; }
+    /* Apply position: relative only to elements that aren't already positioned,
+       so we don't override .chat-fab's `position: fixed` bottom-right placement. */
+    .advanced-locked { opacity: 0.8; }
+    .advanced-locked:not(.chat-fab):not(.chat-panel) { position: relative; }
     .advanced-locked::after {
       content: "PART 2";
       position: absolute;
